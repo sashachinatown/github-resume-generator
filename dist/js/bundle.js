@@ -2591,8 +2591,15 @@ const getData = (user) => {
 
             userLanguages.textContent = str.length > 3 ? `Languages: ${str.slice(0,-2)}` : 'No repositories found';
         })
+        form.reset();
     })
-    .catch(error => console.log(error.message))
+    .catch(error => {
+        console.log(error.message)
+        form.reset();
+        input.setAttribute("placeholder", "Invalid username, try again!");
+        input.setAttribute("style", "background-color: #ffd1d1");
+        setTimeout(() => input.removeAttribute("style", "background-color: #ffd1d1"), 1000);
+    })
 }
 
 button.addEventListener('click', (e) => {
@@ -2601,7 +2608,7 @@ button.addEventListener('click', (e) => {
     const userName = input.value || 'sashachinatown';
 
     getData(userName);
-    form.reset();
+    
 });
 
 function displayInfo(userData) {
