@@ -16,13 +16,45 @@ const getData = (user) => {
     .then(response => {
         console.log(response.data);
         displayInfo(response.data);
+
+        axios.get(`https://api.github.com/users/${user}/repos`)
+        .then(response => {
+            let languageArr = [];
+
+            response.data.forEach(obj => {
+                obj.language ? languageArr.push(obj.language) : null;
+            });
+
+            const languages = languageArr.reduce((acc, rec) => {
+                return (typeof acc[rec] !== 'undefined') 
+                  ? { ...acc, [rec]: acc[rec] + 1 } 
+                  : { ...acc, [rec]: 1 }
+            }, {});
+
+            let total = 0;
+            const languageValues = Object.values(languages);
+            const languageKeys = Object.keys(languages);
+
+            for (let amount of languageValues) {
+                total += amount;
+            }
+
+            languageKeys.forEach(key => languages[key] = Math.round(languages[key] * 100 / total) + '%');
+            
+            let str = '';
+
+            for (const [key, value] of Object.entries(languages)) {
+                str += `${key}(${value}), `;
+            }
+
+            userLanguages.textContent = str.length > 3 ? `Languages: ${str.slice(0,-2)}` : 'No repositories found';
+        })
     })
     .catch(error => console.log(error.message))
 }
 
 button.addEventListener('click', (e) => {
     e.preventDefault();
-    console.log(input.value);
     
     const userName = input.value || 'sashachinatown';
 
@@ -45,12 +77,13 @@ function displayInfo(userData) {
         userImage.classList.add('user-info');
         userImage.setAttribute('src', userData.avatar_url);
         userBio.textContent = `Bio: ${userData.bio ?? 'empty'}`;
-        // userLanguages.textContent = `Languages: ${userData.repos_url}`;
+        userLanguages.setAttribute('style', 'margin: 1%; margin-left: 10%; margin-right: 10%;');
 
         wrapper.appendChild(userInfoWrapper);
         userInfoWrapper.appendChild(userImage);
         userInfoWrapper.appendChild(userInfo);
         wrapper.appendChild(userBio);
+        wrapper.appendChild(userLanguages);
 
     } else {
 

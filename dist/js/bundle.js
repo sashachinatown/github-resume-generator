@@ -2547,23 +2547,56 @@ const wrapper = document.getElementById('wrapper'),
       input = document.querySelector('input'),
       button = form.querySelector('button');
 
-const userInfoWrapper = document.createElement('div');
-const userImage = document.createElement('img');
-const userInfo = document.createElement('ul');
-const userBio = document.createElement('span');
+const userInfoWrapper = document.createElement('div'),
+      userImage = document.createElement('img'),
+      userInfo = document.createElement('ul'),
+      userBio = document.createElement('span'),
+      userLanguages = document.createElement('span');
 
 const getData = (user) => {
     axios__WEBPACK_IMPORTED_MODULE_0___default().get(`https://api.github.com/users/${user}`)
     .then(response => {
         console.log(response.data);
         displayInfo(response.data);
+
+        axios__WEBPACK_IMPORTED_MODULE_0___default().get(`https://api.github.com/users/${user}/repos`)
+        .then(response => {
+            let languageArr = [];
+
+            response.data.forEach(obj => {
+                obj.language ? languageArr.push(obj.language) : null;
+            });
+
+            const languages = languageArr.reduce((acc, rec) => {
+                return (typeof acc[rec] !== 'undefined') 
+                  ? { ...acc, [rec]: acc[rec] + 1 } 
+                  : { ...acc, [rec]: 1 }
+            }, {});
+
+            let total = 0;
+            const languageValues = Object.values(languages);
+            const languageKeys = Object.keys(languages);
+
+            for (let amount of languageValues) {
+                total += amount;
+            }
+
+            languageKeys.forEach(key => languages[key] = Math.round(languages[key] * 100 / total) + '%');
+            
+            let str = '';
+
+            for (const [key, value] of Object.entries(languages)) {
+                str += `${key}(${value}), `;
+            }
+
+            userLanguages.textContent = str.length > 3 ? `Languages: ${str.slice(0,-2)}` : 'No repositories found';
+        })
     })
     .catch(error => console.log(error.message))
 }
 
 button.addEventListener('click', (e) => {
     e.preventDefault();
-    console.log(input.value);
     
     const userName = input.value || 'sashachinatown';
 
@@ -2585,13 +2618,14 @@ function displayInfo(userData) {
         userInfoWrapper.classList.add('user-info-wrapper');
         userImage.classList.add('user-info');
         userImage.setAttribute('src', userData.avatar_url);
-        // userBio.classList.add('span-italic');
         userBio.textContent = `Bio: ${userData.bio ?? 'empty'}`;
+        userLanguages.setAttribute('style', 'margin: 1%; margin-left: 10%; margin-right: 10%;');
 
         wrapper.appendChild(userInfoWrapper);
         userInfoWrapper.appendChild(userImage);
         userInfoWrapper.appendChild(userInfo);
         wrapper.appendChild(userBio);
+        wrapper.appendChild(userLanguages);
 
     } else {
 
