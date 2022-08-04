@@ -52,15 +52,18 @@ const getData = (user) => {
         form.reset();
     })
     .catch(error => {
-        console.log(error.message)
+        console.log(error.message);
         form.reset();
+
         input.setAttribute("placeholder", "Invalid username, try again!");
         input.setAttribute("style", "background-color: #ffd1d1");
+
         setTimeout(() => input.removeAttribute("style", "background-color: #ffd1d1"), 1000);
     })
 }
 
 button.addEventListener('click', (e) => {
+
     e.preventDefault();
     
     const userName = input.value || 'sashachinatown';
@@ -84,6 +87,7 @@ function displayInfo(userData) {
         userImage.classList.add('user-info');
         userImage.setAttribute('src', userData.avatar_url);
         userBio.textContent = `Bio: ${userData.bio ?? 'empty'}`;
+        userBio.setAttribute('style', 'margin-left: 10%; margin-right: 10%;');
         userLanguages.setAttribute('style', 'margin: 1%; margin-left: 10%; margin-right: 10%;');
 
         wrapper.appendChild(userInfoWrapper);
